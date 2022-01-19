@@ -31,6 +31,7 @@ def test_can_allocate_if_avaliable_less_than_required():
 
 def test_can_allocate_if_avaliable_equal_to_required():
     batch, line = make_batch_and_line("ELEGANT-LAMP", 20, 20)
+
     assert batch.can_allocate(line)
 
 
@@ -39,3 +40,18 @@ def test_can_allocate_if_skus_do_not_match():
     different_sku_line = OrderLine(orderid="order-123", sku="DAY LAMP", qty=10)
 
     assert batch.can_allocate(different_sku_line) is False
+
+
+def test_can_only_deallocate_allocated_line():
+    batch, unallocated_line = make_batch_and_line("NIGHT-LAMP", 20, 2)
+    batch.deallocate(unallocated_line)
+
+    assert batch.avaliable_quantity == 20
+
+
+def test_allocation_is_idempotent():
+    batch, line = make_batch_and_line("ANGULAR-DESK", 20, 2)
+    batch.allocate(line)
+    batch.allocate(line)
+
+    assert batch.avaliable_quantity == 18

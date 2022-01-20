@@ -5,12 +5,18 @@ from typing import Optional, Set, Any, List
 from pydantic import BaseModel
 
 
+class OutOfStock(Exception):
+    pass
+
+
 def allocate(line: OrderLine, batches: List[Batch]) -> str:
     # we can make use of the sorted() on batches by implementing __gt__ method
-    batch = next(batch for batch in sorted(batches) if batch.can_allocate(line))
-
-    batch.allocate(line)
-    return batch.reference
+    try:
+        batch = next(batch for batch in sorted(batches) if batch.can_allocate(line))
+        batch.allocate(line)
+        return batch.reference
+    except StopIteration:
+        raise OutOfStock(f"Out of Stock for SKU:{line.sku}")
 
 
 class OrderLine(BaseModel):

@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Optional, Set
+from typing import Optional, Set, Any
 
 from pydantic import BaseModel
 
@@ -44,3 +44,13 @@ class Batch:
 
     def __repr__(self) -> str:
         return f"{type(self).__name__}(reference={self.reference}, sku={self.sku}, eta={self.eta}, purchased_quantity={self._purchased_quantity}, allocated_quantity={self.allocated_quantity}, avaliable_quantity={self.avaliable_quantity})"
+
+    # defines behavior for entity equality, we must explicit state the __eq__ and __hash__ methods.
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, Batch):
+            return False
+        # if they're both of the same instance, lets check if the references are the same.
+        return other.reference == self.reference
+
+    def __hash__(self) -> int:
+        return hash(self.reference)

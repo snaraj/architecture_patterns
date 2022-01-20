@@ -3,8 +3,6 @@ from typing import Optional, Set
 
 from pydantic import BaseModel
 
-import uuid
-
 
 class OrderLine(BaseModel):
     orderid: str
@@ -44,5 +42,5 @@ class Batch:
     def can_allocate(self, line: OrderLine) -> bool:
         return self.sku == line.sku and self.avaliable_quantity >= line.qty
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{type(self).__name__}(reference={self.reference}, sku={self.sku}, eta={self.eta}, purchased_quantity={self._purchased_quantity}, allocated_quantity={self.allocated_quantity}, avaliable_quantity={self.avaliable_quantity})"

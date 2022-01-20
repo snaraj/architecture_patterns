@@ -1,7 +1,16 @@
+from __future__ import annotations
 from datetime import date
-from typing import Optional, Set, Any
+from typing import Optional, Set, Any, List
 
 from pydantic import BaseModel
+
+
+def allocate(line: OrderLine, batches: List[Batch]) -> str:
+    # we can make use of the sorted() on batches by implementing __gt__ method
+    batch = next(batch for batch in sorted(batches) if batch.can_allocate(line))
+
+    batch.allocate(line)
+    return batch.reference
 
 
 class OrderLine(BaseModel):
@@ -13,6 +22,7 @@ class OrderLine(BaseModel):
         frozen = True  # instances of OrderLine will be Immutable
 
 
+# DOMAIN MODEL for BATCH
 class Batch:
     def __init__(self, reference: str, sku: str, qty: int, eta: Optional[date]) -> None:
         self.reference = reference
@@ -54,3 +64,12 @@ class Batch:
 
     def __hash__(self) -> int:
         return hash(self.reference)
+
+    def __gt__(self, other) -> bool:
+        # without ETA, we can't sort a Batch
+        if self.eta is None:
+            return False
+        # Same as above, both batches need to have an ETA in order to compare
+        if other.eta is None:
+            return False
+        return self.eta > other.eta
